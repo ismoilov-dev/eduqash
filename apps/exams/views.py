@@ -3,8 +3,7 @@ from rest_framework import viewsets, permissions, status, filters
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend
-from drf_spectacular.utils import extend_schema
-
+from drf_spectacular.utils import extend_schema, extend_schema_view
 from apps.exams.models import Exam, ExamSection, Question, AnswerChoice, ExamAttempt, UserAnswer
 from apps.exams.serializers import (
     ExamSerializer,
@@ -17,6 +16,14 @@ from apps.exams.band_calculator import BandCalculatorService
 from apps.core.permissions import IsTeacher, IsAdmin
 
 
+@extend_schema_view(
+    list=extend_schema(summary="Imtihonlar ro'yxatini ko'rish"),
+    create=extend_schema(summary="Yangi imtihon yaratish (O'qituvchi/Admin)"),
+    retrieve=extend_schema(summary="Imtihon tafsilotlarini ko'rish"),
+    update=extend_schema(summary="Imtihonni to'liq tahrirlash"),
+    partial_update=extend_schema(summary="Imtihonni qisman tahrirlash"),
+    destroy=extend_schema(summary="Imtihonni o'chirish"),
+)
 @extend_schema(tags=['Exams'])
 class ExamViewSet(viewsets.ModelViewSet):
     queryset = Exam.objects.filter(is_active=True)
@@ -30,7 +37,7 @@ class ExamViewSet(viewsets.ModelViewSet):
             return [permissions.IsAuthenticated(), IsTeacher()]
         return [permissions.AllowAny()]
 
-    @extend_schema(tags=['Exams'], request=None, responses={201: ExamAttemptSerializer})
+    @extend_schema(summary="Imtihon topshirishni boshlash (Attempt yaratish)", request=None, responses={201: ExamAttemptSerializer})
     @action(detail=True, methods=['post'], permission_classes=[permissions.IsAuthenticated])
     def start_attempt(self, request, pk=None):
         exam = self.get_object()
@@ -41,6 +48,14 @@ class ExamViewSet(viewsets.ModelViewSet):
         return Response(ExamAttemptSerializer(attempt).data, status=status.HTTP_201_CREATED)
 
 
+@extend_schema_view(
+    list=extend_schema(summary="Imtihon bo'limlari (Listening, Reading...) ro'yxati"),
+    create=extend_schema(summary="Yangi bo'lim qo'shish (O'qituvchi)"),
+    retrieve=extend_schema(summary="Imtihon bo'limi tafsilotlari"),
+    update=extend_schema(summary="Imtihon bo'limini to'liq tahrirlash"),
+    partial_update=extend_schema(summary="Imtihon bo'limini qisman tahrirlash"),
+    destroy=extend_schema(summary="Imtihon bo'limini o'chirish"),
+)
 @extend_schema(tags=['Exams'])
 class ExamSectionViewSet(viewsets.ModelViewSet):
     queryset = ExamSection.objects.filter(is_active=True)
@@ -53,6 +68,14 @@ class ExamSectionViewSet(viewsets.ModelViewSet):
         return [permissions.AllowAny()]
 
 
+@extend_schema_view(
+    list=extend_schema(summary="Imtihon savollari ro'yxatini ko'rish"),
+    create=extend_schema(summary="Yangi savol qo'shish (O'qituvchi)"),
+    retrieve=extend_schema(summary="Savol tafsilotlarini ko'rish"),
+    update=extend_schema(summary="Savolni to'liq tahrirlash"),
+    partial_update=extend_schema(summary="Savolni qisman tahrirlash"),
+    destroy=extend_schema(summary="Savolni o'chirish"),
+)
 @extend_schema(tags=['Exams'])
 class QuestionViewSet(viewsets.ModelViewSet):
     queryset = Question.objects.filter(is_active=True)
@@ -65,6 +88,10 @@ class QuestionViewSet(viewsets.ModelViewSet):
         return [permissions.AllowAny()]
 
 
+@extend_schema_view(
+    list=extend_schema(summary="Foydalanuvchining topshirgan imtihonlari tarixi"),
+    retrieve=extend_schema(summary="Imtihon topshirish natijasi va Band Score"),
+)
 @extend_schema(tags=['Exams'])
 class ExamAttemptViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = ExamAttempt.objects.filter(is_active=True)
@@ -77,7 +104,7 @@ class ExamAttemptViewSet(viewsets.ReadOnlyModelViewSet):
             return ExamAttempt.objects.filter(is_active=True)
         return ExamAttempt.objects.filter(student=user, is_active=True)
 
-    @extend_schema(tags=['Exams'], request=SubmitExamSerializer)
+    @extend_schema(summary="Imtihon javoblarini topshirish va IELTS Band Score hisoblash", request=SubmitExamSerializer)
     @action(detail=True, methods=['post'])
     def submit(self, request, pk=None):
         attempt = self.get_object()

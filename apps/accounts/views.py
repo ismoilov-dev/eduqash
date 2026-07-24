@@ -32,8 +32,9 @@ def get_tokens_for_user(user):
 @extend_schema(tags=['Accounts'])
 class RegisterView(APIView):
     permission_classes = [permissions.AllowAny]
+    serializer_class = RegisterSerializer
 
-    @extend_schema(tags=['Accounts'], request=RegisterSerializer, responses={201: UserSerializer})
+    @extend_schema(summary="Yangi foydalanuvchini ro'yxatdan o'tkazish", request=RegisterSerializer, responses={201: UserSerializer})
     def post(self, request):
         serializer = RegisterSerializer(data=request.data)
         if serializer.is_valid():
@@ -66,8 +67,9 @@ class RegisterView(APIView):
 @extend_schema(tags=['Accounts'])
 class LoginView(APIView):
     permission_classes = [permissions.AllowAny]
+    serializer_class = LoginSerializer
 
-    @extend_schema(tags=['Accounts'], request=LoginSerializer)
+    @extend_schema(summary="Tizimga kirish (Login)", request=LoginSerializer)
     def post(self, request):
         serializer = LoginSerializer(data=request.data)
         if serializer.is_valid():
@@ -83,8 +85,9 @@ class LoginView(APIView):
 @extend_schema(tags=['Accounts'])
 class VerifyEmailView(APIView):
     permission_classes = [permissions.AllowAny]
+    serializer_class = VerifyEmailSerializer
 
-    @extend_schema(tags=['Accounts'], request=VerifyEmailSerializer)
+    @extend_schema(summary="Email tasdiqlash kodi", request=VerifyEmailSerializer)
     def post(self, request):
         serializer = VerifyEmailSerializer(data=request.data)
         if serializer.is_valid():
@@ -104,8 +107,9 @@ class VerifyEmailView(APIView):
 @extend_schema(tags=['Accounts'])
 class GoogleAuthView(APIView):
     permission_classes = [permissions.AllowAny]
+    serializer_class = GoogleAuthSerializer
 
-    @extend_schema(tags=['Accounts'], request=GoogleAuthSerializer)
+    @extend_schema(summary="Google orqali avtorizatsiya", request=GoogleAuthSerializer)
     def post(self, request):
         serializer = GoogleAuthSerializer(data=request.data)
         if serializer.is_valid():
@@ -143,8 +147,9 @@ class GoogleAuthView(APIView):
 @extend_schema(tags=['Accounts'])
 class TelegramAuthView(APIView):
     permission_classes = [permissions.AllowAny]
+    serializer_class = TelegramAuthSerializer
 
-    @extend_schema(tags=['Accounts'], request=TelegramAuthSerializer)
+    @extend_schema(summary="Telegram orqali avtorizatsiya", request=TelegramAuthSerializer)
     def post(self, request):
         serializer = TelegramAuthSerializer(data=request.data)
         if serializer.is_valid():
@@ -175,8 +180,9 @@ class TelegramAuthView(APIView):
 @extend_schema(tags=['Accounts'])
 class ForgotPasswordView(APIView):
     permission_classes = [permissions.AllowAny]
+    serializer_class = ForgotPasswordSerializer
 
-    @extend_schema(tags=['Accounts'], request=ForgotPasswordSerializer)
+    @extend_schema(summary="Parolni unutganda emailga tiklash kodini yuborish", request=ForgotPasswordSerializer)
     def post(self, request):
         serializer = ForgotPasswordSerializer(data=request.data)
         if serializer.is_valid():
@@ -203,8 +209,9 @@ class ForgotPasswordView(APIView):
 @extend_schema(tags=['Accounts'])
 class ResetPasswordView(APIView):
     permission_classes = [permissions.AllowAny]
+    serializer_class = ResetPasswordSerializer
 
-    @extend_schema(tags=['Accounts'], request=ResetPasswordSerializer)
+    @extend_schema(summary="Email kodi orqali parolni yangilash", request=ResetPasswordSerializer)
     def post(self, request):
         serializer = ResetPasswordSerializer(data=request.data)
         if serializer.is_valid():
@@ -225,8 +232,9 @@ class ResetPasswordView(APIView):
 @extend_schema(tags=['Accounts'])
 class ChangePasswordView(APIView):
     permission_classes = [permissions.IsAuthenticated]
+    serializer_class = ChangePasswordSerializer
 
-    @extend_schema(tags=['Accounts'], request=ChangePasswordSerializer)
+    @extend_schema(summary="Parolni o'zgartirish (Avtorizatsiyadan o'tgan foydalanuvchi)", request=ChangePasswordSerializer)
     def post(self, request):
         serializer = ChangePasswordSerializer(data=request.data)
         if serializer.is_valid():

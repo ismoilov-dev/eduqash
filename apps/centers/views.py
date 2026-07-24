@@ -1,11 +1,19 @@
 from rest_framework import viewsets, permissions, filters
 from django_filters.rest_framework import DjangoFilterBackend
-from drf_spectacular.utils import extend_schema
+from drf_spectacular.utils import extend_schema, extend_schema_view
 from apps.centers.models import LearningCenter
 from apps.centers.serializers import LearningCenterSerializer
 from apps.core.permissions import IsOwnerOrReadOnly, IsCenterOwner
 
 
+@extend_schema_view(
+    list=extend_schema(summary="O'quv markazlari ro'yxatini ko'rish"),
+    create=extend_schema(summary="Yangi o'quv markazi qo'shish (Markaz Egasi/Admin)"),
+    retrieve=extend_schema(summary="O'quv markazi ma'lumotlarini ko'rish"),
+    update=extend_schema(summary="O'quv markazini to'liq tahrirlash"),
+    partial_update=extend_schema(summary="O'quv markazini qisman tahrirlash"),
+    destroy=extend_schema(summary="O'quv markazini o'chirish"),
+)
 @extend_schema(tags=['Centers'])
 class LearningCenterViewSet(viewsets.ModelViewSet):
     queryset = LearningCenter.objects.filter(is_active=True)

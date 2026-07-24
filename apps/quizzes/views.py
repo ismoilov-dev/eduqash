@@ -2,8 +2,7 @@ from rest_framework import viewsets, permissions, status, filters
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend
-from drf_spectacular.utils import extend_schema
-
+from drf_spectacular.utils import extend_schema, extend_schema_view
 from apps.quizzes.models import QuestionBank, QuizQuestion, Quiz, QuizAttempt, Leaderboard
 from apps.quizzes.serializers import (
     QuestionBankSerializer,
@@ -17,6 +16,14 @@ from apps.quizzes.excel_service import ExcelQuizImporter
 from apps.core.permissions import IsTeacher, IsAdmin, IsOwnerOrReadOnly
 
 
+@extend_schema_view(
+    list=extend_schema(summary="Savol banklari ro'yxatini ko'rish"),
+    create=extend_schema(summary="Yangi savol banki yaratish (O'qituvchi/Admin)"),
+    retrieve=extend_schema(summary="Savol banki tafsilotlarini ko'rish"),
+    update=extend_schema(summary="Savol bankini to'liq tahrirlash"),
+    partial_update=extend_schema(summary="Savol bankini qisman tahrirlash"),
+    destroy=extend_schema(summary="Savol bankini o'chirish"),
+)
 @extend_schema(tags=['Quizzes'])
 class QuestionBankViewSet(viewsets.ModelViewSet):
     queryset = QuestionBank.objects.filter(is_active=True)
@@ -30,6 +37,14 @@ class QuestionBankViewSet(viewsets.ModelViewSet):
         return [permissions.AllowAny()]
 
 
+@extend_schema_view(
+    list=extend_schema(summary="Quizlar ro'yxatini ko'rish"),
+    create=extend_schema(summary="Yangi quiz yaratish (O'qituvchi/Admin)"),
+    retrieve=extend_schema(summary="Quiz tafsilotlarini ko'rish"),
+    update=extend_schema(summary="Quizni to'liq tahrirlash"),
+    partial_update=extend_schema(summary="Quizni qisman tahrirlash"),
+    destroy=extend_schema(summary="Quizni o'chirish"),
+)
 @extend_schema(tags=['Quizzes'])
 class QuizViewSet(viewsets.ModelViewSet):
     queryset = Quiz.objects.filter(is_active=True)
@@ -44,6 +59,14 @@ class QuizViewSet(viewsets.ModelViewSet):
         return [permissions.AllowAny()]
 
 
+@extend_schema_view(
+    list=extend_schema(summary="Quiz topshirishlar tarixi"),
+    create=extend_schema(summary="Quiz topshirish va natijani saqlash (Leaderboard yangilanadi)"),
+    retrieve=extend_schema(summary="Topshirilgan quiz natijasi tafsiloti"),
+    update=extend_schema(summary="Quiz topshirish natijasini tahrirlash"),
+    partial_update=extend_schema(summary="Quiz topshirish natijasini qisman tahrirlash"),
+    destroy=extend_schema(summary="Quiz topshirish natijasini o'chirish"),
+)
 @extend_schema(tags=['Quizzes'])
 class QuizAttemptViewSet(viewsets.ModelViewSet):
     queryset = QuizAttempt.objects.filter(is_active=True)
@@ -76,6 +99,10 @@ class QuizAttemptViewSet(viewsets.ModelViewSet):
             rank += 1
 
 
+@extend_schema_view(
+    list=extend_schema(summary="Peshqadamlar reytingi (Leaderboard) ro'yxati"),
+    retrieve=extend_schema(summary="Peshqadam ma'lumotlari"),
+)
 @extend_schema(tags=['Quizzes'])
 class LeaderboardViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Leaderboard.objects.all()
@@ -86,8 +113,9 @@ class LeaderboardViewSet(viewsets.ReadOnlyModelViewSet):
 @extend_schema(tags=['Quizzes'])
 class ImportExcelView(APIView):
     permission_classes = [permissions.IsAuthenticated, IsTeacher]
+    serializer_class = ExcelImportSerializer
 
-    @extend_schema(tags=['Quizzes'], request=ExcelImportSerializer)
+    @extend_schema(summary="Excel (.xlsx) faylidan savollarni QuestionBank-ga ommaviy yuklash", request=ExcelImportSerializer)
     def post(self, request):
         serializer = ExcelImportSerializer(data=request.data)
         if not serializer.is_valid():

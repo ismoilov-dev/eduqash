@@ -1,8 +1,7 @@
 from rest_framework import viewsets, permissions, status
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from drf_spectacular.utils import extend_schema
-
+from drf_spectacular.utils import extend_schema, extend_schema_view
 from apps.certificates.models import Certificate
 from apps.certificates.serializers import (
     CertificateSerializer,
@@ -15,6 +14,10 @@ from apps.exams.models import Exam
 from apps.core.permissions import IsTeacher, IsAdmin
 
 
+@extend_schema_view(
+    list=extend_schema(summary="Sertifikatlar ro'yxatini ko'rish (PDF va QR havolalari bilan)"),
+    retrieve=extend_schema(summary="Sertifikat tafsilotlarini ko'rish"),
+)
 @extend_schema(tags=['Certificates'])
 class CertificateViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Certificate.objects.filter(is_active=True)
@@ -31,8 +34,9 @@ class CertificateViewSet(viewsets.ReadOnlyModelViewSet):
 @extend_schema(tags=['Certificates'])
 class IssueCertificateView(APIView):
     permission_classes = [permissions.IsAuthenticated, IsTeacher]
+    serializer_class = IssueCertificateSerializer
 
-    @extend_schema(tags=['Certificates'], request=IssueCertificateSerializer)
+    @extend_schema(summary="Yangi sertifikat yaratish va PDF/QR avto-generatsiya qilish", request=IssueCertificateSerializer, responses={201: CertificateSerializer})
     def post(self, request):
         serializer = IssueCertificateSerializer(data=request.data)
         if not serializer.is_valid():
@@ -71,8 +75,9 @@ class IssueCertificateView(APIView):
 @extend_schema(tags=['Certificates'])
 class VerifyCertificateView(APIView):
     permission_classes = [permissions.AllowAny]
+    serializer_class = CertificateSerializer
 
-    @extend_schema(tags=['Certificates'])
+    @extend_schema(summary="Sertifikatning haqiqiyligini tekshirish (QR verification)", responses={200: CertificateSerializer})
     def get(self, request, unique_id):
         cert = Certificate.objects.filter(unique_id=unique_id, is_active=True).first()
         if not cert:

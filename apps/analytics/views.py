@@ -19,7 +19,7 @@ from apps.core.permissions import IsAdmin
 class DashboardOverviewView(APIView):
     permission_classes = [permissions.IsAuthenticated, IsAdmin]
 
-    @extend_schema(tags=['Analytics'], responses={200: dict})
+    @extend_schema(summary="Admin paneli uchun umumiy platforma analitikasi", responses={200: dict})
     def get(self, request):
         now = timezone.now()
         today = now.date()
@@ -70,7 +70,7 @@ class DashboardOverviewView(APIView):
 class RevenueAnalyticsView(APIView):
     permission_classes = [permissions.IsAuthenticated, IsAdmin]
 
-    @extend_schema(tags=['Analytics'])
+    @extend_schema(summary="Daromadlar va to'lov usullari statistikasi", responses={200: dict})
     def get(self, request):
         by_provider = Payment.objects.values('provider').annotate(
             total_revenue=Sum('amount'),

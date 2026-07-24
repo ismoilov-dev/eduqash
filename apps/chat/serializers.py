@@ -12,6 +12,9 @@ class MessageSerializer(serializers.ModelSerializer):
         read_only_fields = ('sender', 'created_at', 'updated_at')
 
 
+from drf_spectacular.utils import extend_schema_field
+
+
 class ConversationSerializer(serializers.ModelSerializer):
     participants_details = UserSerializer(source='participants', many=True, read_only=True)
     last_message = serializers.SerializerMethodField()
@@ -21,6 +24,7 @@ class ConversationSerializer(serializers.ModelSerializer):
         fields = '__all__'
         read_only_fields = ('created_at', 'updated_at')
 
+    @extend_schema_field(MessageSerializer)
     def get_last_message(self, obj):
         last = obj.messages.order_by('-created_at').first()
         return MessageSerializer(last).data if last else None

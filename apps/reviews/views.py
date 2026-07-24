@@ -2,13 +2,20 @@ from rest_framework import viewsets, permissions, status, filters
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend
-from drf_spectacular.utils import extend_schema
-
+from drf_spectacular.utils import extend_schema, extend_schema_view
 from apps.reviews.models import Review, ReviewReport
 from apps.reviews.serializers import ReviewSerializer, ReviewReportSerializer
 from apps.core.permissions import IsOwnerOrReadOnly, IsAdmin
 
 
+@extend_schema_view(
+    list=extend_schema(summary="Sharhlar va baholar ro'yxatini ko'rish"),
+    create=extend_schema(summary="Yangi sharh/baho qoldirish"),
+    retrieve=extend_schema(summary="Sharh tafsilotlarini ko'rish"),
+    update=extend_schema(summary="Sharhni to'liq tahrirlash"),
+    partial_update=extend_schema(summary="Sharhni qisman tahrirlash"),
+    destroy=extend_schema(summary="Sharhni o'chirish"),
+)
 @extend_schema(tags=['Reviews'])
 class ReviewViewSet(viewsets.ModelViewSet):
     queryset = Review.objects.filter(is_active=True)
@@ -24,7 +31,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
             return [permissions.IsAuthenticated(), IsOwnerOrReadOnly()]
         return [permissions.AllowAny()]
 
-    @extend_schema(tags=['Reviews'], request=None)
+    @extend_schema(summary="Sharhga like bosish", request=None)
     @action(detail=True, methods=['post'], permission_classes=[permissions.IsAuthenticated])
     def like(self, request, pk=None):
         review = self.get_object()
@@ -32,7 +39,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
         review.save()
         return Response({'likes_count': review.likes_count}, status=status.HTTP_200_OK)
 
-    @extend_schema(tags=['Reviews'], request=None)
+    @extend_schema(summary="Sharhga dislike bosish", request=None)
     @action(detail=True, methods=['post'], permission_classes=[permissions.IsAuthenticated])
     def dislike(self, request, pk=None):
         review = self.get_object()
@@ -41,6 +48,14 @@ class ReviewViewSet(viewsets.ModelViewSet):
         return Response({'dislikes_count': review.dislikes_count}, status=status.HTTP_200_OK)
 
 
+@extend_schema_view(
+    list=extend_schema(summary="Shikoyatlar (Reports) ro'yxati (Admin)"),
+    create=extend_schema(summary="Sharh ustidan shikoyat yuborish (Report)"),
+    retrieve=extend_schema(summary="Shikoyat tafsilotlarini ko'rish"),
+    update=extend_schema(summary="Shikoyatni to'liq tahrirlash"),
+    partial_update=extend_schema(summary="Shikoyatni qisman tahrirlash"),
+    destroy=extend_schema(summary="Shikoyatni o'chirish"),
+)
 @extend_schema(tags=['Reviews'])
 class ReviewReportViewSet(viewsets.ModelViewSet):
     queryset = ReviewReport.objects.all()

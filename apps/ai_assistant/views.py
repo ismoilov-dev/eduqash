@@ -15,8 +15,9 @@ from apps.ai_assistant.ai_service import AIService
 @extend_schema(tags=['AI Assistant'])
 class CheckEssayView(APIView):
     permission_classes = [permissions.IsAuthenticated]
+    serializer_class = EssayCheckSerializer
 
-    @extend_schema(tags=['AI Assistant'], request=EssayCheckSerializer)
+    @extend_schema(summary="Inshoni AI bilan tahlil qilish va IELTS Band bashorat qilish", request=EssayCheckSerializer)
     def post(self, request):
         serializer = EssayCheckSerializer(data=request.data)
         if serializer.is_valid():
@@ -34,8 +35,9 @@ class CheckEssayView(APIView):
 @extend_schema(tags=['AI Assistant'])
 class GrammarFixView(APIView):
     permission_classes = [permissions.IsAuthenticated]
+    serializer_class = GrammarFixSerializer
 
-    @extend_schema(tags=['AI Assistant'], request=GrammarFixSerializer)
+    @extend_schema(summary="Matndagi grammatik xatolarni AI orqali tuzatish", request=GrammarFixSerializer)
     def post(self, request):
         serializer = GrammarFixSerializer(data=request.data)
         if serializer.is_valid():
@@ -48,8 +50,9 @@ class GrammarFixView(APIView):
 @extend_schema(tags=['AI Assistant'])
 class RoadmapView(APIView):
     permission_classes = [permissions.IsAuthenticated]
+    serializer_class = RoadmapSerializer
 
-    @extend_schema(tags=['AI Assistant'], request=RoadmapSerializer)
+    @extend_schema(summary="Individual o'quv rejasini (Roadmap) AI yordamida generatsiya qilish", request=RoadmapSerializer)
     def post(self, request):
         serializer = RoadmapSerializer(data=request.data)
         if serializer.is_valid():
@@ -63,8 +66,9 @@ class RoadmapView(APIView):
 @extend_schema(tags=['AI Assistant'])
 class CheckHomeworkView(APIView):
     permission_classes = [permissions.IsAuthenticated]
+    serializer_class = HomeworkCheckSerializer
 
-    @extend_schema(tags=['AI Assistant'], request=HomeworkCheckSerializer)
+    @extend_schema(summary="Uy vazifasini AI bilan avtomatik tekshirish va baholash", request=HomeworkCheckSerializer)
     def post(self, request):
         serializer = HomeworkCheckSerializer(data=request.data)
         if serializer.is_valid():

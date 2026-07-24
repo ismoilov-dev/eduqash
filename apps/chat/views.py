@@ -1,8 +1,7 @@
 from rest_framework import viewsets, permissions, status
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from drf_spectacular.utils import extend_schema
-
+from drf_spectacular.utils import extend_schema, extend_schema_view
 from apps.chat.models import Conversation, Message
 from apps.chat.serializers import (
     ConversationSerializer,
@@ -12,6 +11,13 @@ from apps.chat.serializers import (
 from apps.accounts.models import User
 
 
+@extend_schema_view(
+    list=extend_schema(summary="Foydalanuvchining barcha chat suhbatlari ro'yxatini ko'rish"),
+    retrieve=extend_schema(summary="Chat suhbati tafsilotlarini ko'rish"),
+    update=extend_schema(summary="Chat suhbatini to'liq tahrirlash"),
+    partial_update=extend_schema(summary="Chat suhbatini qisman tahrirlash"),
+    destroy=extend_schema(summary="Chat suhbatini o'chirish"),
+)
 @extend_schema(tags=['Chat'])
 class ConversationViewSet(viewsets.ModelViewSet):
     serializer_class = ConversationSerializer
@@ -22,7 +28,7 @@ class ConversationViewSet(viewsets.ModelViewSet):
             return Conversation.objects.none()
         return self.request.user.conversations.filter(is_active=True)
 
-    @extend_schema(tags=['Chat'], request=CreateConversationSerializer)
+    @extend_schema(summary="Yangi chat suhbatini boshlash", request=CreateConversationSerializer, responses={201: ConversationSerializer})
     def create(self, request, *args, **kwargs):
         serializer = CreateConversationSerializer(data=request.data)
         if not serializer.is_valid():
@@ -40,6 +46,14 @@ class ConversationViewSet(viewsets.ModelViewSet):
         return Response(ConversationSerializer(conv).data, status=status.HTTP_201_CREATED)
 
 
+@extend_schema_view(
+    list=extend_schema(summary="Suhbatdagi eski xabarlar tarixini ko'rish (?conversation=<id>)"),
+    create=extend_schema(summary="Chatga xabar yoki fayl yuborish"),
+    retrieve=extend_schema(summary="Xabar tafsilotlarini ko'rish"),
+    update=extend_schema(summary="Xabarni to'liq tahrirlash"),
+    partial_update=extend_schema(summary="Xabarni qisman tahrirlash"),
+    destroy=extend_schema(summary="Xabarni o'chirish"),
+)
 @extend_schema(tags=['Chat'])
 class MessageViewSet(viewsets.ModelViewSet):
     serializer_class = MessageSerializer

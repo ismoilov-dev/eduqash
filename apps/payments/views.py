@@ -3,8 +3,7 @@ from django.utils import timezone
 from rest_framework import viewsets, permissions, status, generics
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from drf_spectacular.utils import extend_schema
-
+from drf_spectacular.utils import extend_schema, extend_schema_view
 from apps.payments.models import Payment, PromoCode
 from apps.payments.serializers import (
     PaymentSerializer,
@@ -17,6 +16,10 @@ from apps.courses.models import Course
 from apps.core.permissions import IsAdmin
 
 
+@extend_schema_view(
+    list=extend_schema(summary="To'lovlar tarixini ko'rish (User o'zinikini, Admin barchasini)"),
+    retrieve=extend_schema(summary="To'lov kvitansiyasi tafsilotlarini ko'rish"),
+)
 @extend_schema(tags=['Payments'])
 class PaymentViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Payment.objects.filter(is_active=True)
@@ -33,8 +36,9 @@ class PaymentViewSet(viewsets.ReadOnlyModelViewSet):
 @extend_schema(tags=['Payments'])
 class CreatePaymentView(APIView):
     permission_classes = [permissions.IsAuthenticated]
+    serializer_class = CreatePaymentSerializer
 
-    @extend_schema(tags=['Payments'], request=CreatePaymentSerializer)
+    @extend_schema(summary="Yangi to'lov yaratish (Payme, Click yoki Fake provider)", request=CreatePaymentSerializer, responses={201: PaymentSerializer})
     def post(self, request):
         serializer = CreatePaymentSerializer(data=request.data)
         if not serializer.is_valid():
@@ -78,8 +82,9 @@ class CreatePaymentView(APIView):
 @extend_schema(tags=['Payments'])
 class VerifyPaymentView(APIView):
     permission_classes = [permissions.IsAuthenticated]
+    serializer_class = VerifyPaymentSerializer
 
-    @extend_schema(tags=['Payments'], request=VerifyPaymentSerializer)
+    @extend_schema(summary="To'lov holatini tranzaksiya ID orqali tasdiqlash", request=VerifyPaymentSerializer, responses={200: PaymentSerializer})
     def post(self, request):
         serializer = VerifyPaymentSerializer(data=request.data)
         if not serializer.is_valid():
@@ -101,8 +106,9 @@ class VerifyPaymentView(APIView):
 @extend_schema(tags=['Payments'])
 class ApplyPromoView(APIView):
     permission_classes = [permissions.IsAuthenticated]
+    serializer_class = ApplyPromoSerializer
 
-    @extend_schema(tags=['Payments'], request=ApplyPromoSerializer)
+    @extend_schema(summary="Promokodni tekshirish va chegirma foizini olish", request=ApplyPromoSerializer)
     def post(self, request):
         serializer = ApplyPromoSerializer(data=request.data)
         if not serializer.is_valid():
@@ -127,6 +133,14 @@ class ApplyPromoView(APIView):
         }, status=status.HTTP_200_OK)
 
 
+@extend_schema_view(
+    list=extend_schema(summary="Promokodlar ro'yxatini ko'rish (Admin)"),
+    create=extend_schema(summary="Yangi promokod yaratish (Admin)"),
+    retrieve=extend_schema(summary="Promokod tafsilotlarini ko'rish"),
+    update=extend_schema(summary="Promokodni to'liq tahrirlash"),
+    partial_update=extend_schema(summary="Promokodni qisman tahrirlash"),
+    destroy=extend_schema(summary="Promokodni o'chirish"),
+)
 @extend_schema(tags=['Payments'])
 class PromoCodeViewSet(viewsets.ModelViewSet):
     queryset = PromoCode.objects.filter(is_active=True)

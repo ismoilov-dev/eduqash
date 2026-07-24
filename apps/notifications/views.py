@@ -1,4 +1,4 @@
-from rest_framework import viewsets, permissions, status
+from rest_framework import viewsets, permissions, status, parsers
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from drf_spectacular.utils import extend_schema, extend_schema_view
@@ -17,11 +17,21 @@ from apps.notifications.serializers import NotificationSerializer
 class NotificationViewSet(viewsets.ModelViewSet):
     serializer_class = NotificationSerializer
     permission_classes = [permissions.IsAuthenticated]
+    parser_classes = (parsers.JSONParser, parsers.FormParser, parsers.MultiPartParser)
 
     def get_queryset(self):
         if getattr(self, 'swagger_fake_view', False) or not self.request.user.is_authenticated:
             return Notification.objects.none()
-        return Notification.objects.filter(user=self.request.user, is_active=True)
+        user = self.request.user
+        if user.role in ['super_admin', 'admin']:
+            return Notification.objects.filter(is_active=True)
+        return Notification.objects.filter(user=user, is_active=True)
+
+    def perform_create(self, serializer):
+        if 'user' not in serializer.validated_data:
+            serializer.save(user=self.request.user)
+        else:
+            serializer.save()
 
     @extend_schema(summary="Bitta bildirishnomani o'qilgan deb belgilash", request=None)
     @action(detail=True, methods=['post'])

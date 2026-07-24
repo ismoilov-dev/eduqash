@@ -1,0 +1,15 @@
+[Unit]
+Description=EDUQASH PRO V2.0 Daphne ASGI Application Server
+After=network.target redis-server.service postgresql.service
+
+[Service]
+User=ubuntu
+Group=www-data
+WorkingDirectory=/home/ubuntu/eduqash2
+ExecStart=/home/ubuntu/eduqash2/venv/bin/daphne -b 127.0.0.1 -p 8000 config.asgi:application
+Restart=always
+RestartSec=5
+EnvironmentFile=/home/ubuntu/eduqash2/.env
+
+[Install]
+WantedBy=multi-user.target

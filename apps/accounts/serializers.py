@@ -8,10 +8,11 @@ class UserSerializer(serializers.ModelSerializer):
         model = User
         fields = (
             'id', 'username', 'email', 'first_name', 'last_name', 
-            'role', 'is_email_verified', 'phone', 'telegram_id', 
+            'role', 'role_approval_status', 'rejection_reason',
+            'is_email_verified', 'phone', 'telegram_id', 
             'avatar', 'bio', 'created_at', 'updated_at'
         )
-        read_only_fields = ('id', 'is_email_verified', 'created_at', 'updated_at')
+        read_only_fields = ('id', 'is_email_verified', 'role_approval_status', 'rejection_reason', 'created_at', 'updated_at')
 
 
 class RegisterSerializer(serializers.ModelSerializer):
@@ -19,31 +20,48 @@ class RegisterSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ('id', 'username', 'email', 'password', 'first_name', 'last_name', 'role', 'phone')
+        fields = ('id', 'username', 'email', 'password', 'first_name', 'last_name', 'role', 'phone', 'bio')
+
+    def validate_role(self, value):
+        allowed_roles = ('student', 'teacher', 'center_owner')
+        if value not in allowed_roles:
+            raise serializers.ValidationError("Ushbu rol bilan to'g'ridan-to me'yorida ro'yxatdan o'tib bo'lmaydi.")
+        return value
 
     def create(self, validated_data):
         password = validated_data.pop('password')
-        user = User.objects.create_user(**validated_data)
-        user.set_password(password)
-        user.save()
+        validated_data['role_approval_status'] = 'pending'
+
+        user = User.objects.create_user(password=password, **validated_data)
         return user
 
 
 class LoginSerializer(serializers.Serializer):
-    username_or_email = serializers.CharField()
+    username = serializers.CharField(help_text="Username yoki Email kiriting")
     password = serializers.CharField(write_only=True)
 
     def validate(self, attrs):
-        username_or_email = attrs.get('username_or_email')
+        username_val = attrs.get('username')
         password = attrs.get('password')
 
-        user = User.objects.filter(email=username_or_email).first() or User.objects.filter(username=username_or_email).first()
+        user = User.objects.filter(username=username_val).first() or User.objects.filter(email=username_val).first()
 
         if not user or not user.check_password(password):
             raise serializers.ValidationError({"detail": "Invalid credentials."})
 
         if not user.is_active:
             raise serializers.ValidationError({"detail": "User account is disabled."})
+
+        if user.role_approval_status == 'pending':
+            raise serializers.ValidationError({
+                "detail": "Sizning rolingiz hali admin tomonidan tasdiqlanmagan. Iltimos admin tasdiqlashini kuting."
+            })
+
+        if user.role_approval_status == 'rejected':
+            reason = f" Sabab: {user.rejection_reason}" if user.rejection_reason else ""
+            raise serializers.ValidationError({
+                "detail": f"Sizning ariza rolingiz admin tomonidan rad etilgan.{reason}"
+            })
 
         attrs['user'] = user
         return attrs
@@ -82,3 +100,9 @@ class ResetPasswordSerializer(serializers.Serializer):
 class ChangePasswordSerializer(serializers.Serializer):
     old_password = serializers.CharField()
     new_password = serializers.CharField(min_length=6)
+
+
+class AdminApproveRoleSerializer(serializers.Serializer):
+    action = serializers.ChoiceField(choices=['approve', 'reject'])
+    rejection_reason = serializers.CharField(required=False, allow_blank=True)
+

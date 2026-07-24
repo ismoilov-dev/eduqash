@@ -1,4 +1,4 @@
-from rest_framework import viewsets, permissions, status, filters
+from rest_framework import viewsets, permissions, status, filters, parsers
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend
@@ -20,6 +20,7 @@ from apps.core.permissions import IsOwnerOrReadOnly, IsAdmin
 class ReviewViewSet(viewsets.ModelViewSet):
     queryset = Review.objects.filter(is_active=True)
     serializer_class = ReviewSerializer
+    parser_classes = (parsers.JSONParser, parsers.FormParser, parsers.MultiPartParser)
     filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
     filterset_fields = ['course', 'center', 'teacher', 'rating']
     ordering_fields = ['rating', 'likes_count', 'created_at']

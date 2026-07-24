@@ -18,6 +18,7 @@ from apps.accounts.serializers import (
     ForgotPasswordSerializer,
     ResetPasswordSerializer,
     ChangePasswordSerializer,
+    AdminApproveRoleSerializer,
 )
 
 
@@ -39,27 +40,11 @@ class RegisterView(APIView):
         serializer = RegisterSerializer(data=request.data)
         if serializer.is_valid():
             user = serializer.save()
-            code = str(random.randint(100000, 999999))
-            user.email_verification_code = code
-            user.save()
 
-            # Send Email verification
-            try:
-                send_mail(
-                    subject="EDUQASH PRO - Email Verification",
-                    message=f"Your email verification code is: {code}",
-                    from_email=settings.DEFAULT_FROM_EMAIL,
-                    recipient_list=[user.email],
-                    fail_silently=True
-                )
-            except Exception as e:
-                pass
-
-            tokens = get_tokens_for_user(user)
             return Response({
                 'user': UserSerializer(user).data,
-                'tokens': tokens,
-                'message': 'User registered successfully. Check your email for verification code.'
+                'tokens': None,
+                'message': 'Ro\'yxatdan o\'tish arizangiz qabul qilindi. Admin tasdiqlaganidan so\'ng username yoki email va parolingiz orqali tizimga kira olasiz.'
             }, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -99,6 +84,11 @@ class VerifyEmailView(APIView):
                 user.is_email_verified = True
                 user.email_verification_code = None
                 user.save()
+                if user.role_approval_status == 'pending':
+                    return Response({
+                        'message': 'Email tasdiqlandi. Rolingiz admin tomonidan tasdiqlanishi kutilmoqda. Admin tasdiqlagach tizimga kirishingiz mumkin.'
+                    }, status=status.HTTP_200_OK)
+
                 return Response({'message': 'Email successfully verified.'}, status=status.HTTP_200_OK)
             return Response({'error': 'Invalid verification code or email.'}, status=status.HTTP_400_BAD_REQUEST)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -128,13 +118,19 @@ class GoogleAuthView(APIView):
                     first_name=first_name,
                     last_name=last_name,
                     google_id=google_id,
-                    is_email_verified=True
+                    is_email_verified=True,
+                    role_approval_status='approved'
                 )
             else:
                 if not user.google_id:
                     user.google_id = google_id
                     user.is_email_verified = True
                     user.save()
+
+            if user.role_approval_status == 'pending':
+                return Response({'error': 'Sizning rolingiz admin tasdiqlashini kutilmoqda.'}, status=status.HTTP_403_FORBIDDEN)
+            if user.role_approval_status == 'rejected':
+                return Response({'error': f'Sizning ariza rolingiz rad etilgan. Sabab: {user.rejection_reason or ""}'}, status=status.HTTP_403_FORBIDDEN)
 
             tokens = get_tokens_for_user(user)
             return Response({
@@ -166,8 +162,14 @@ class TelegramAuthView(APIView):
                     first_name=first_name,
                     last_name=last_name,
                     telegram_id=telegram_id,
-                    is_email_verified=True
+                    is_email_verified=True,
+                    role_approval_status='approved'
                 )
+
+            if user.role_approval_status == 'pending':
+                return Response({'error': 'Sizning rolingiz admin tasdiqlashini kutilmoqda.'}, status=status.HTTP_403_FORBIDDEN)
+            if user.role_approval_status == 'rejected':
+                return Response({'error': f'Sizning ariza rolingiz rad etilgan. Sabab: {user.rejection_reason or ""}'}, status=status.HTTP_403_FORBIDDEN)
 
             tokens = get_tokens_for_user(user)
             return Response({
@@ -254,3 +256,50 @@ class ProfileView(generics.RetrieveUpdateAPIView):
 
     def get_object(self):
         return self.request.user
+
+
+@extend_schema(tags=['Accounts'])
+class AdminPendingRolesView(generics.ListAPIView):
+    permission_classes = [permissions.IsAdminUser]
+    serializer_class = UserSerializer
+
+    @extend_schema(summary="Tasdiqlanishi kutilayotgan foydalanuvchilar ro'yxati (Admin)")
+    def get_queryset(self):
+        return User.objects.filter(role_approval_status='pending').order_by('-created_at')
+
+
+@extend_schema(tags=['Accounts'])
+class AdminApproveRoleView(APIView):
+    permission_classes = [permissions.IsAdminUser]
+    serializer_class = AdminApproveRoleSerializer
+
+    @extend_schema(summary="Foydalanuvchi rolini tasdiqlash yoki rad etish (Admin)", request=AdminApproveRoleSerializer)
+    def post(self, request, user_id):
+        user = User.objects.filter(id=user_id).first()
+        if not user:
+            return Response({'error': 'Foydalanuvchi topilmadi.'}, status=status.HTTP_404_NOT_FOUND)
+
+        serializer = AdminApproveRoleSerializer(data=request.data)
+        if serializer.is_valid():
+            action = serializer.validated_data['action']
+            rejection_reason = serializer.validated_data.get('rejection_reason', '')
+
+            if action == 'approve':
+                user.role_approval_status = 'approved'
+                user.rejection_reason = None
+                user.save()
+                return Response({
+                    'message': f"Foydalanuvchi ({user.username}) roli ({user.role}) muvaffaqiyatli tasdiqlandi.",
+                    'user': UserSerializer(user).data
+                }, status=status.HTTP_200_OK)
+            elif action == 'reject':
+                user.role_approval_status = 'rejected'
+                user.rejection_reason = rejection_reason
+                user.save()
+                return Response({
+                    'message': f"Foydalanuvchi ({user.username}) roli tasdiqlanmadi (Rad etildi).",
+                    'user': UserSerializer(user).data
+                }, status=status.HTTP_200_OK)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+

@@ -14,12 +14,24 @@ class User(AbstractUser, BaseModel):
         ('student', 'Student'),
     )
 
+    ROLE_APPROVAL_STATUS_CHOICES = (
+        ('pending', 'Pending'),
+        ('approved', 'Approved'),
+        ('rejected', 'Rejected'),
+    )
+
     role = models.CharField(max_length=20, choices=ROLE_CHOICES, default='student')
+    role_approval_status = models.CharField(
+        max_length=20, 
+        choices=ROLE_APPROVAL_STATUS_CHOICES, 
+        default='pending'
+    )
+    rejection_reason = models.TextField(blank=True, null=True)
     is_email_verified = models.BooleanField(default=False)
     phone = models.CharField(max_length=20, blank=True, null=True)
     telegram_id = models.CharField(max_length=50, blank=True, null=True, unique=True)
     google_id = models.CharField(max_length=100, blank=True, null=True, unique=True)
-    avatar = models.ImageField(upload_to='avatars/', blank=True, null=True)
+    avatar = models.ImageField(upload_to='avatars/', max_length=500, blank=True, null=True)
     bio = models.TextField(blank=True, null=True)
     email_verification_code = models.CharField(max_length=6, blank=True, null=True)
     password_reset_code = models.CharField(max_length=6, blank=True, null=True)

@@ -3,6 +3,7 @@ from apps.exams.views import (
     ExamViewSet,
     ExamSectionViewSet,
     QuestionViewSet,
+    AnswerChoiceViewSet,
     ExamAttemptViewSet,
 )
 
@@ -21,6 +22,12 @@ router.register(r'sections', ExamSectionViewSet, basename='exam-sections')
 # - POST /exams/questions/ : Savol qo'shish (Teacher/Admin)
 # - GET/PUT/PATCH/DELETE /exams/questions/{id}/ : Savolni ko'rish/tahrirlash/o'chirish
 router.register(r'questions', QuestionViewSet, basename='exam-questions')
+
+# 3. Javob variantlari (Answer Choices)
+# - GET /exams/choices/ : Variantlar ro'yxati (?question=<question_id>)
+# - POST /exams/choices/ : Variant qo'shish (Teacher/Admin)
+# - GET/PUT/PATCH/DELETE /exams/choices/{id}/ : Variantni ko'rish/tahrirlash/o'chirish
+router.register(r'choices', AnswerChoiceViewSet, basename='exam-choices')
 
 # 3. Urinishlar va topshirishlar (Exam Attempts)
 # - GET /exams/attempts/ : Foydalanuvchining imtihon topshirganlik tarixi (Authed)

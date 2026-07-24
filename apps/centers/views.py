@@ -1,4 +1,4 @@
-from rest_framework import viewsets, permissions, filters
+from rest_framework import viewsets, permissions, filters, parsers
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import extend_schema, extend_schema_view
 from apps.centers.models import LearningCenter
@@ -18,6 +18,7 @@ from apps.core.permissions import IsOwnerOrReadOnly, IsCenterOwner
 class LearningCenterViewSet(viewsets.ModelViewSet):
     queryset = LearningCenter.objects.filter(is_active=True)
     serializer_class = LearningCenterSerializer
+    parser_classes = (parsers.MultiPartParser, parsers.FormParser, parsers.JSONParser)
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     search_fields = ['name', 'description', 'address']
     filterset_fields = ['owner']

@@ -1,5 +1,5 @@
 from django.utils import timezone
-from rest_framework import viewsets, permissions, status, filters
+from rest_framework import viewsets, permissions, status, filters, parsers
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend
@@ -9,6 +9,7 @@ from apps.exams.serializers import (
     ExamSerializer,
     ExamSectionSerializer,
     QuestionSerializer,
+    AnswerChoiceSerializer,
     ExamAttemptSerializer,
     SubmitExamSerializer,
 )
@@ -28,6 +29,7 @@ from apps.core.permissions import IsTeacher, IsAdmin
 class ExamViewSet(viewsets.ModelViewSet):
     queryset = Exam.objects.filter(is_active=True)
     serializer_class = ExamSerializer
+    parser_classes = (parsers.MultiPartParser, parsers.FormParser, parsers.JSONParser)
     filter_backends = [DjangoFilterBackend, filters.SearchFilter]
     search_fields = ['title', 'description']
     filterset_fields = ['exam_type']
@@ -60,6 +62,7 @@ class ExamViewSet(viewsets.ModelViewSet):
 class ExamSectionViewSet(viewsets.ModelViewSet):
     queryset = ExamSection.objects.filter(is_active=True)
     serializer_class = ExamSectionSerializer
+    parser_classes = (parsers.MultiPartParser, parsers.FormParser, parsers.JSONParser)
     filterset_fields = ['exam']
 
     def get_permissions(self):
@@ -80,7 +83,29 @@ class ExamSectionViewSet(viewsets.ModelViewSet):
 class QuestionViewSet(viewsets.ModelViewSet):
     queryset = Question.objects.filter(is_active=True)
     serializer_class = QuestionSerializer
+    parser_classes = (parsers.MultiPartParser, parsers.FormParser, parsers.JSONParser)
     filterset_fields = ['section', 'question_type']
+
+    def get_permissions(self):
+        if self.action in ['create', 'update', 'partial_update', 'destroy']:
+            return [permissions.IsAuthenticated(), IsTeacher()]
+        return [permissions.AllowAny()]
+
+
+@extend_schema_view(
+    list=extend_schema(summary="Imtihon savollarining javob variantlari ro'yxati"),
+    create=extend_schema(summary="Savolga yangi javob varianti qo'shish (O'qituvchi)"),
+    retrieve=extend_schema(summary="Javob varianti tafsilotlari"),
+    update=extend_schema(summary="Javob variantini to'liq tahrirlash"),
+    partial_update=extend_schema(summary="Javob variantini qisman tahrirlash"),
+    destroy=extend_schema(summary="Javob variantini o'chirish"),
+)
+@extend_schema(tags=['Exams'])
+class AnswerChoiceViewSet(viewsets.ModelViewSet):
+    queryset = AnswerChoice.objects.filter(is_active=True)
+    serializer_class = AnswerChoiceSerializer
+    parser_classes = (parsers.MultiPartParser, parsers.FormParser, parsers.JSONParser)
+    filterset_fields = ['question', 'is_correct']
 
     def get_permissions(self):
         if self.action in ['create', 'update', 'partial_update', 'destroy']:

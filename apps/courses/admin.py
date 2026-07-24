@@ -15,7 +15,7 @@ class HomeworkInline(TabularInline):
 
 @admin.register(Course)
 class CourseAdmin(ModelAdmin):
-    list_display = ('title', 'type', 'price', 'duration', 'teacher', 'center', 'is_active', 'created_at')
+    list_display = ('id', 'title', 'type', 'price', 'duration', 'teacher', 'center', 'is_active', 'created_at')
     list_filter = ('type', 'is_active', 'created_at')
     search_fields = ('title', 'description')
     ordering = ('-created_at',)
@@ -24,7 +24,7 @@ class CourseAdmin(ModelAdmin):
 
 @admin.register(Lesson)
 class LessonAdmin(ModelAdmin):
-    list_display = ('title', 'course', 'order', 'created_at')
+    list_display = ('id', 'title', 'course', 'order', 'created_at')
     list_filter = ('course', 'created_at')
     search_fields = ('title', 'course__title')
     ordering = ('order', 'created_at')

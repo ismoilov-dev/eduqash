@@ -110,10 +110,15 @@ class LeaderboardViewSet(viewsets.ReadOnlyModelViewSet):
     filterset_fields = ['quiz']
 
 
+from django.http import HttpResponse
+from rest_framework import parsers
+
+
 @extend_schema(tags=['Quizzes'])
 class ImportExcelView(APIView):
     permission_classes = [permissions.IsAuthenticated, IsTeacher]
     serializer_class = ExcelImportSerializer
+    parser_classes = (parsers.MultiPartParser, parsers.FormParser)
 
     @extend_schema(summary="Excel (.xlsx) faylidan savollarni QuestionBank-ga ommaviy yuklash", request=ExcelImportSerializer)
     def post(self, request):
@@ -136,3 +141,18 @@ class ImportExcelView(APIView):
             }, status=status.HTTP_201_CREATED)
         except Exception as e:
             return Response({'error': f'Failed to parse Excel file: {str(e)}'}, status=status.HTTP_400_BAD_REQUEST)
+
+
+@extend_schema(tags=['Quizzes'])
+class DownloadTemplateView(APIView):
+    permission_classes = [permissions.AllowAny]
+
+    @extend_schema(summary="Savollarni import qilish uchun namuna Excel (.xlsx) shablonini ko'chirib olish")
+    def get(self, request):
+        excel_bytes = ExcelQuizImporter.generate_template_excel()
+        response = HttpResponse(
+            excel_bytes,
+            content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        )
+        response['Content-Disposition'] = 'attachment; filename="question_import_template.xlsx"'
+        return response

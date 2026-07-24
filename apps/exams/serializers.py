@@ -6,7 +6,7 @@ from apps.accounts.serializers import UserSerializer
 class AnswerChoiceSerializer(serializers.ModelSerializer):
     class Meta:
         model = AnswerChoice
-        fields = ('id', 'text', 'is_correct')
+        fields = ('id', 'question', 'text', 'is_correct')
 
 
 class QuestionSerializer(serializers.ModelSerializer):

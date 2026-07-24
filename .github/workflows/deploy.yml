@@ -1,0 +1,40 @@
+name: Deploy EDUQASH PRO V2.0 to VPS (No Docker, Nginx + Daphne)
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    name: Deploy to Production VPS
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Execute Remote SSH Commands for Auto-Deploy
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USERNAME }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: 22
+          script: |
+            echo "1. Git Pull - Oxirgi kodni yuklash..."
+            cd /home/ubuntu/eduqash2
+            git pull origin main
+
+            echo "2. Virtualenv faollashtirish va pakatgatlarni yangilash..."
+            source venv/bin/activate
+            pip install -r requirements.txt
+
+            echo "3. Migratsiya va Statika yig'ish..."
+            python manage.py migrate --noinput
+            python manage.py collectstatic --noinput
+
+            echo "4. Servislarni qayta yoqish (Restart)..."
+            sudo systemctl daemon-reload
+            sudo systemctl restart eduqash eduqash-celery eduqash-bot nginx
+            echo "🚀 Deployment muvaffaqiyatli yakunlandi!"

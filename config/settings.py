@@ -163,6 +163,23 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
+# Default Storage Engine (CloudMediaStorage: ImgBB for images, Supabase for files)
+DEFAULT_FILE_STORAGE = 'apps.core.utils.storage.CloudMediaStorage'
+
+STORAGES = {
+    "default": {
+        "BACKEND": "apps.core.utils.storage.CloudMediaStorage",
+    },
+    "staticfiles": {
+        "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+    },
+}
+
+# Data & File Upload Limits Configuration
+DATA_UPLOAD_MAX_NUMBER_FIELDS = None  # Removes field limit to prevent TooManyFieldsSent error
+DATA_UPLOAD_MAX_MEMORY_SIZE = 524288000  # 500 MB max request payload
+FILE_UPLOAD_MAX_MEMORY_SIZE = 524288000  # 500 MB max file size in memory
+
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # REST Framework Configuration
@@ -378,3 +395,10 @@ UNFOLD = {
         ],
     },
 }
+
+# Cloud Storage Settings (ImgBB & Supabase)
+IMGBB_API_KEY = env('IMGBB_API_KEY', default='')
+SUPABASE_URL = env('SUPABASE_URL', default='')
+SUPABASE_KEY = env('SUPABASE_KEY', default='')
+SUPABASE_STORAGE_BUCKET = env('SUPABASE_STORAGE_BUCKET', default='eduqash-media')
+

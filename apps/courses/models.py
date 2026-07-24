@@ -14,9 +14,9 @@ class Course(BaseModel):
     type = models.CharField(max_length=20, choices=COURSE_TYPE_CHOICES, default='online')
     title = models.CharField(max_length=255)
     description = models.TextField()
-    price = models.DecimalField(max_digits=12, decimal_places=2, default=0.00)
+    price = models.DecimalField(max_digits=12, decimal_places=2)
     duration = models.CharField(max_length=100, help_text="e.g. 3 months / 60 hours")
-    thumbnail = models.ImageField(upload_to='courses/thumbnails/', blank=True, null=True)
+    thumbnail = models.ImageField(upload_to='courses/thumbnails/', max_length=500, blank=True, null=True)
     teacher = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
@@ -40,8 +40,8 @@ class Course(BaseModel):
 class Lesson(BaseModel):
     course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='lessons')
     title = models.CharField(max_length=255)
-    video = models.FileField(upload_to='courses/videos/', blank=True, null=True)
-    pdf = models.FileField(upload_to='courses/pdfs/', blank=True, null=True)
+    video = models.FileField(upload_to='courses/videos/', max_length=500, blank=True, null=True)
+    pdf = models.FileField(upload_to='courses/pdfs/', max_length=500, blank=True, null=True)
     order = models.PositiveIntegerField(default=1)
 
     class Meta:
@@ -55,7 +55,7 @@ class Homework(BaseModel):
     lesson = models.ForeignKey(Lesson, on_delete=models.CASCADE, related_name='homeworks')
     title = models.CharField(max_length=255)
     description = models.TextField()
-    file = models.FileField(upload_to='homeworks/files/', blank=True, null=True)
+    file = models.FileField(upload_to='homeworks/files/', max_length=500, blank=True, null=True)
     deadline = models.DateTimeField(blank=True, null=True)
 
     class Meta:
@@ -72,7 +72,7 @@ class HomeworkSubmission(BaseModel):
         on_delete=models.CASCADE,
         related_name='homework_submissions'
     )
-    file = models.FileField(upload_to='homeworks/submissions/', blank=True, null=True)
+    file = models.FileField(upload_to='homeworks/submissions/', max_length=500, blank=True, null=True)
     submission_text = models.TextField(blank=True, null=True)
     score = models.DecimalField(max_digits=5, decimal_places=2, blank=True, null=True)
     feedback = models.TextField(blank=True, null=True)

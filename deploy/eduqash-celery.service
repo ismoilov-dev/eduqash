@@ -1,0 +1,15 @@
+[Unit]
+Description=EDUQASH PRO V2.0 Celery Worker Service
+After=network.target redis-server.service
+
+[Service]
+User=ubuntu
+Group=www-data
+WorkingDirectory=/home/ubuntu/eduqash2
+ExecStart=/home/ubuntu/eduqash2/venv/bin/celery -A config worker -l info
+Restart=always
+RestartSec=5
+EnvironmentFile=/home/ubuntu/eduqash2/.env
+
+[Install]
+WantedBy=multi-user.target

@@ -20,7 +20,7 @@ class ExamSectionInline(TabularInline):
 
 @admin.register(Exam)
 class ExamAdmin(ModelAdmin):
-    list_display = ('title', 'exam_type', 'duration_minutes', 'total_questions', 'passing_score', 'is_active', 'created_at')
+    list_display = ('id', 'title', 'exam_type', 'duration_minutes', 'total_questions', 'passing_score', 'is_active', 'created_at')
     list_filter = ('exam_type', 'is_active', 'created_at')
     search_fields = ('title', 'description')
     inlines = [ExamSectionInline]

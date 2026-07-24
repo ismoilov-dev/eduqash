@@ -5,8 +5,8 @@ from apps.core.models import BaseModel
 
 class LearningCenter(BaseModel):
     name = models.CharField(max_length=255)
-    logo = models.ImageField(upload_to='centers/logos/', blank=True, null=True)
-    cover = models.ImageField(upload_to='centers/covers/', blank=True, null=True)
+    logo = models.ImageField(upload_to='centers/logos/', max_length=500, blank=True, null=True)
+    cover = models.ImageField(upload_to='centers/covers/', max_length=500, blank=True, null=True)
     description = models.TextField()
     rating = models.DecimalField(max_digits=3, decimal_places=2, default=0.00)
     phone = models.CharField(max_length=50)

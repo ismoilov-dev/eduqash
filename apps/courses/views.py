@@ -1,4 +1,4 @@
-from rest_framework import viewsets, permissions, filters
+from rest_framework import viewsets, permissions, filters, parsers
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import extend_schema, extend_schema_view
 from apps.courses.models import Course, Lesson, Homework, HomeworkSubmission
@@ -23,6 +23,7 @@ from apps.core.permissions import IsTeacher, IsAdmin, IsOwnerOrReadOnly
 class CourseViewSet(viewsets.ModelViewSet):
     queryset = Course.objects.filter(is_active=True)
     serializer_class = CourseSerializer
+    parser_classes = (parsers.MultiPartParser, parsers.FormParser, parsers.JSONParser)
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     search_fields = ['title', 'description']
     filterset_fields = ['type', 'teacher', 'center']
@@ -46,6 +47,7 @@ class CourseViewSet(viewsets.ModelViewSet):
 class LessonViewSet(viewsets.ModelViewSet):
     queryset = Lesson.objects.filter(is_active=True)
     serializer_class = LessonSerializer
+    parser_classes = (parsers.MultiPartParser, parsers.FormParser, parsers.JSONParser)
     filter_backends = [DjangoFilterBackend, filters.SearchFilter]
     search_fields = ['title']
     filterset_fields = ['course']
@@ -68,6 +70,7 @@ class LessonViewSet(viewsets.ModelViewSet):
 class HomeworkViewSet(viewsets.ModelViewSet):
     queryset = Homework.objects.filter(is_active=True)
     serializer_class = HomeworkSerializer
+    parser_classes = (parsers.MultiPartParser, parsers.FormParser, parsers.JSONParser)
     filter_backends = [DjangoFilterBackend, filters.SearchFilter]
     search_fields = ['title', 'description']
     filterset_fields = ['lesson']
@@ -90,6 +93,7 @@ class HomeworkViewSet(viewsets.ModelViewSet):
 class HomeworkSubmissionViewSet(viewsets.ModelViewSet):
     queryset = HomeworkSubmission.objects.filter(is_active=True)
     serializer_class = HomeworkSubmissionSerializer
+    parser_classes = (parsers.MultiPartParser, parsers.FormParser, parsers.JSONParser)
     filter_backends = [DjangoFilterBackend]
     filterset_fields = ['homework', 'student']
 

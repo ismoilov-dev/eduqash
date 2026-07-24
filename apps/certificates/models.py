@@ -28,8 +28,8 @@ class Certificate(BaseModel):
     )
     unique_id = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)
     title = models.CharField(max_length=255)
-    qr_code = models.ImageField(upload_to='certificates/qrcodes/', blank=True, null=True)
-    pdf_file = models.FileField(upload_to='certificates/pdfs/', blank=True, null=True)
+    qr_code = models.ImageField(upload_to='certificates/qrcodes/', max_length=500, blank=True, null=True)
+    pdf_file = models.FileField(upload_to='certificates/pdfs/', max_length=500, blank=True, null=True)
     issue_date = models.DateField(auto_now_add=True)
 
     class Meta:

@@ -6,6 +6,7 @@ from apps.quizzes.views import (
     QuizAttemptViewSet,
     LeaderboardViewSet,
     ImportExcelView,
+    DownloadTemplateView,
 )
 
 # Quizzes, Question Banks & Leaderboard API Endpoints (Frontend uchun)
@@ -36,4 +37,6 @@ router.register(r'', QuizViewSet, basename='quizzes')
 urlpatterns = [
     # 5. Excel fayldan savollarni yuklash (POST, Teacher/Admin) -> Form-data: {file: <.xlsx>, bank_id: <bank_id>}
     path('import-excel/', ImportExcelView.as_view(), name='quizzes_import_excel'),
+    # 6. Namuna Excel shablonini ko'chirib olish (GET)
+    path('download-excel-template/', DownloadTemplateView.as_view(), name='quizzes_download_excel_template'),
 ] + router.urls

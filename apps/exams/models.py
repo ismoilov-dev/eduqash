@@ -38,7 +38,7 @@ class ExamSection(BaseModel):
     title = models.CharField(max_length=255)
     instructions = models.TextField(blank=True, null=True)
     passage_text = models.TextField(blank=True, null=True)
-    audio_file = models.FileField(upload_to='exams/audio/', blank=True, null=True)
+    audio_file = models.FileField(upload_to='exams/audio/', max_length=500, blank=True, null=True)
     order = models.PositiveIntegerField(default=1)
 
     class Meta:

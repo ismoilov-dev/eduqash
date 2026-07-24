@@ -29,7 +29,7 @@ class Message(BaseModel):
         related_name='sent_messages'
     )
     text = models.TextField(blank=True, null=True)
-    file = models.FileField(upload_to='chat/files/', blank=True, null=True)
+    file = models.FileField(upload_to='chat/files/', max_length=500, blank=True, null=True)
 
     class Meta:
         ordering = ['created_at']

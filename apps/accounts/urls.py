@@ -10,11 +10,13 @@ from apps.accounts.views import (
     ResetPasswordView,
     ChangePasswordView,
     ProfileView,
+    AdminPendingRolesView,
+    AdminApproveRoleView,
 )
 
 # Accounts & Auth API Endpoints (Frontend uchun)
 urlpatterns = [
-    # 1. Ro'yxatdan o'tish (POST) -> Payload: {username, email, password, first_name, last_name, role}
+    # 1. Ro'yxatdan o'tish (POST) -> Payload: {username, email, password, first_name, last_name, role, bio}
     path('register/', RegisterView.as_view(), name='auth_register'),
     
     # 2. Tizimga kirish (POST) -> Payload: {email_or_username, password} -> Res: {user, tokens: {access, refresh}}
@@ -43,4 +45,10 @@ urlpatterns = [
     
     # 10. Profil ma'lumotlarini olish va tahrirlash (GET / PUT / PATCH, Authed) -> Header: Authorization: Bearer <access_token>
     path('profile/', ProfileView.as_view(), name='auth_profile'),
+
+    # 11. Admin: Rol tasdiqlanishi kutilayotganlar (GET, Admin)
+    path('admin/pending-roles/', AdminPendingRolesView.as_view(), name='admin_pending_roles'),
+
+    # 12. Admin: Rolni tasdiqlash yoki rad etish (POST, Admin) -> Payload: {action: "approve"|"reject", rejection_reason: ""}
+    path('admin/approve-role/<int:user_id>/', AdminApproveRoleView.as_view(), name='admin_approve_role'),
 ]

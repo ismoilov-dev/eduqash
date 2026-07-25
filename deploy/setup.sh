@@ -21,6 +21,14 @@ source venv/bin/activate
 pip install --upgrade pip
 pip install -r requirements.txt
 
+if [ -d "frontend" ]; then
+    echo "=== 3b. Frontend Web Ilovasini qurish (React/Vite) ==="
+    cd frontend
+    npm install
+    npm run build
+    cd ..
+fi
+
 echo "=== 4. Statika yig'ish va Database Migration bajarish ==="
 python manage.py migrate --noinput
 python manage.py collectstatic --noinput

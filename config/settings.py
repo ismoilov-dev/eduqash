@@ -164,8 +164,6 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # Default Storage Engine (CloudMediaStorage: ImgBB for images, Supabase for files)
-DEFAULT_FILE_STORAGE = 'apps.core.utils.storage.CloudMediaStorage'
-
 STORAGES = {
     "default": {
         "BACKEND": "apps.core.utils.storage.CloudMediaStorage",

@@ -28,9 +28,9 @@ python manage.py collectstatic --noinput
 PROJECT_DIR=$(pwd)
 sudo mkdir -p /var/www/eduqash/staticfiles
 sudo mkdir -p /var/www/eduqash/media
-sudo cp -r staticfiles/* /var/www/eduqash/staticfiles/ 2>/dev/null || true
+sudo cp -r staticfiles/. /var/www/eduqash/staticfiles/ 2>/dev/null || true
 if [ -d "media" ]; then
-    sudo cp -r media/* /var/www/eduqash/media/ 2>/dev/null || true
+    sudo cp -r media/. /var/www/eduqash/media/ 2>/dev/null || true
 fi
 sudo chmod -R 755 /var/www/eduqash
 

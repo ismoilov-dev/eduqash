@@ -109,7 +109,12 @@ class CloudMediaStorage(Storage):
 
         # Upload images to ImgBB
         if ext in self.IMAGE_EXTENSIONS and getattr(settings, 'IMGBB_API_KEY', ''):
-            return ImgBBStorageService.upload_image(content, name=name)
+            try:
+                return ImgBBStorageService.upload_image(content, name=name)
+            except Exception:
+                if getattr(settings, 'SUPABASE_URL', '') and getattr(settings, 'SUPABASE_KEY', ''):
+                    return SupabaseStorageService.upload_file(content, name=name)
+                raise
 
         # Upload documents and media files to Supabase Storage
         if getattr(settings, 'SUPABASE_URL', '') and getattr(settings, 'SUPABASE_KEY', ''):

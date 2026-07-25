@@ -1,7 +1,14 @@
-import uuid
-from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.models import AbstractUser, UserManager as BaseUserManager
 from django.db import models
 from apps.core.models import BaseModel
+
+
+class UserManager(BaseUserManager):
+    def create_superuser(self, username, email=None, password=None, **extra_fields):
+        extra_fields.setdefault('role', 'super_admin')
+        extra_fields.setdefault('role_approval_status', 'approved')
+        extra_fields.setdefault('is_email_verified', True)
+        return super().create_superuser(username, email, password, **extra_fields)
 
 
 class User(AbstractUser, BaseModel):
@@ -36,8 +43,17 @@ class User(AbstractUser, BaseModel):
     email_verification_code = models.CharField(max_length=6, blank=True, null=True)
     password_reset_code = models.CharField(max_length=6, blank=True, null=True)
 
+    objects = UserManager()
+
     class Meta:
         ordering = ['-created_at']
+
+    def save(self, *args, **kwargs):
+        if self.is_superuser:
+            self.role = 'super_admin'
+            self.role_approval_status = 'approved'
+            self.is_email_verified = True
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return f"{self.username} ({self.get_role_display()})"

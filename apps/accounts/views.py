@@ -3,7 +3,7 @@ from rest_framework import status, generics, permissions
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
-from drf_spectacular.utils import extend_schema
+from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiTypes
 from django.core.mail import send_mail
 from django.conf import settings
 
@@ -268,12 +268,23 @@ class AdminPendingRolesView(generics.ListAPIView):
         return User.objects.filter(role_approval_status='pending').order_by('-created_at')
 
 
-@extend_schema(tags=['Accounts'])
+@extend_schema(
+    tags=['Accounts'],
+    summary="Foydalanuvchi rolini tasdiqlash yoki rad etish (Admin)",
+    parameters=[
+        OpenApiParameter(
+            name="user_id",
+            type=OpenApiTypes.UUID,
+            location=OpenApiParameter.PATH,
+            description="Foydalanuvchi UUID ID-si"
+        )
+    ],
+    request=AdminApproveRoleSerializer
+)
 class AdminApproveRoleView(APIView):
     permission_classes = [permissions.IsAdminUser]
     serializer_class = AdminApproveRoleSerializer
 
-    @extend_schema(summary="Foydalanuvchi rolini tasdiqlash yoki rad etish (Admin)", request=AdminApproveRoleSerializer)
     def post(self, request, user_id):
         user = User.objects.filter(id=user_id).first()
         if not user:

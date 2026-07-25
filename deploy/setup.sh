@@ -28,10 +28,11 @@ python manage.py collectstatic --noinput
 echo "=== 5. Systemd servislarni sozlash va ulash ==="
 PROJECT_DIR=$(pwd)
 CURRENT_USER=$(whoami)
+CURRENT_GROUP=$(id -gn)
 
-sed -e "s|/home/ubuntu/eduqash2|$PROJECT_DIR|g" -e "s|User=ubuntu|User=$CURRENT_USER|g" deploy/eduqash.service | sudo tee /etc/systemd/system/eduqash.service > /dev/null
-sed -e "s|/home/ubuntu/eduqash2|$PROJECT_DIR|g" -e "s|User=ubuntu|User=$CURRENT_USER|g" deploy/eduqash-celery.service | sudo tee /etc/systemd/system/eduqash-celery.service > /dev/null
-sed -e "s|/home/ubuntu/eduqash2|$PROJECT_DIR|g" -e "s|User=ubuntu|User=$CURRENT_USER|g" deploy/eduqash-bot.service | sudo tee /etc/systemd/system/eduqash-bot.service > /dev/null
+sed -e "s|/home/ubuntu/eduqash2|$PROJECT_DIR|g" -e "s|User=ubuntu|User=$CURRENT_USER|g" -e "s|Group=www-data|Group=$CURRENT_GROUP|g" deploy/eduqash.service | sudo tee /etc/systemd/system/eduqash.service > /dev/null
+sed -e "s|/home/ubuntu/eduqash2|$PROJECT_DIR|g" -e "s|User=ubuntu|User=$CURRENT_USER|g" -e "s|Group=www-data|Group=$CURRENT_GROUP|g" deploy/eduqash-celery.service | sudo tee /etc/systemd/system/eduqash-celery.service > /dev/null
+sed -e "s|/home/ubuntu/eduqash2|$PROJECT_DIR|g" -e "s|User=ubuntu|User=$CURRENT_USER|g" -e "s|Group=www-data|Group=$CURRENT_GROUP|g" deploy/eduqash-bot.service | sudo tee /etc/systemd/system/eduqash-bot.service > /dev/null
 
 sudo systemctl daemon-reload
 sudo systemctl enable eduqash eduqash-celery eduqash-bot

@@ -50,5 +50,5 @@ urlpatterns = [
     path('admin/pending-roles/', AdminPendingRolesView.as_view(), name='admin_pending_roles'),
 
     # 12. Admin: Rolni tasdiqlash yoki rad etish (POST, Admin) -> Payload: {action: "approve"|"reject", rejection_reason: ""}
-    path('admin/approve-role/<int:user_id>/', AdminApproveRoleView.as_view(), name='admin_approve_role'),
+    path('admin/approve-role/<uuid:user_id>/', AdminApproveRoleView.as_view(), name='admin_approve_role'),
 ]

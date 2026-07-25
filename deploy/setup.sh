@@ -25,6 +25,11 @@ echo "=== 4. Statika yig'ish va Database Migration bajarish ==="
 python manage.py migrate --noinput
 python manage.py collectstatic --noinput
 
+PROJECT_DIR=$(pwd)
+chmod 755 /root 2>/dev/null || true
+chmod -R 755 "$PROJECT_DIR/staticfiles"
+chmod -R 755 "$PROJECT_DIR/media" 2>/dev/null || true
+
 echo "=== 5. Systemd servislarni sozlash va ulash ==="
 PROJECT_DIR=$(pwd)
 CURRENT_USER=$(whoami)

@@ -23,8 +23,8 @@
                 {% endif %}
 
                 {% if show_delete_link and original %}
-                    {% url opts|unfold_admin_urlname:'delete' original.pk|admin_urlquote as delete_url %}
-                    {% component "unfold/components/button.html" with href=delete_url|add:preserve_filters variant="danger" class="w-full lg:w-auto" %}
+                    {% url opts|admin_urlname:'delete' original.pk|admin_urlquote as delete_url %}
+                    {% component "unfold/components/button.html" with href=delete_url|add:preserved_filters variant="danger" class="w-full lg:w-auto" %}
                         {% trans "Delete" %}
                     {% endcomponent %}
                 {% endif %}

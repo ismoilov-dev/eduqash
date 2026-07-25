@@ -5,34 +5,34 @@
         <div class="flex flex-col-reverse gap-3 items-center mx-auto lg:flex-row-reverse container lg:h-[64px]">
             {% block submit-row %}
                 {% if show_save %}
-                    {% component "unfold/components/button.html" with submit=1 form=opts.model_name|add:"_form" name="_save" class="w-full lg:w-auto" %}
+                    <button type="submit" form="{{ opts.model_name }}_form" name="_save" class="font-medium inline-flex items-center gap-1 rounded-default justify-center whitespace-nowrap cursor-pointer px-3 py-2 border border-transparent bg-primary-600 text-white hover:bg-primary-600/80 w-full lg:w-auto">
                         {% trans "Save" %}
-                    {% endcomponent %}
+                    </button>
                 {% endif %}
 
                 {% if show_save_and_continue %}
-                    {% component "unfold/components/button.html" with submit=1 form=opts.model_name|add:"_form" name="_continue" variant="secondary" class="w-full lg:w-auto" %}
+                    <button type="submit" form="{{ opts.model_name }}_form" name="_continue" class="font-medium inline-flex items-center gap-1 rounded-default justify-center whitespace-nowrap cursor-pointer px-3 py-2 bg-base-100 border border-transparent text-important dark:bg-base-800 hover:bg-base-100/80 dark:hover:bg-base-800/80 w-full lg:w-auto">
                         {% if can_change %}{% trans "Save and continue editing" %}{% else %}{% trans "Save and view" %}{% endif %}
-                    {% endcomponent %}
+                    </button>
                 {% endif %}
 
                 {% if show_save_and_add_another %}
-                    {% component "unfold/components/button.html" with submit=1 form=opts.model_name|add:"_form" name="_addanother" variant="secondary" class="w-full lg:w-auto" %}
+                    <button type="submit" form="{{ opts.model_name }}_form" name="_addanother" class="font-medium inline-flex items-center gap-1 rounded-default justify-center whitespace-nowrap cursor-pointer px-3 py-2 bg-base-100 border border-transparent text-important dark:bg-base-800 hover:bg-base-100/80 dark:hover:bg-base-800/80 w-full lg:w-auto">
                         {% trans "Save and add another" %}
-                    {% endcomponent %}
+                    </button>
                 {% endif %}
 
                 {% if show_delete_link and original %}
                     {% url opts|admin_urlname:'delete' original.pk|admin_urlquote as delete_url %}
-                    {% component "unfold/components/button.html" with href=delete_url|add:preserved_filters variant="danger" class="w-full lg:w-auto" %}
+                    <a href="{{ delete_url }}{% if preserved_filters %}?{{ preserved_filters }}{% endif %}" class="font-medium inline-flex items-center gap-1 rounded-default justify-center whitespace-nowrap cursor-pointer px-3 py-2 border border-red-600 bg-red-600 text-white hover:bg-red-600/80 w-full lg:w-auto">
                         {% trans "Delete" %}
-                    {% endcomponent %}
+                    </a>
                 {% endif %}
 
                 {% for action in actions_submit_line %}
-                    {% component "unfold/components/button.html" with submit=1 form=opts.model_name|add:"_form" name=action.action_name variant="default" class="w-full lg:w-auto" %}
+                    <button type="submit" form="{{ opts.model_name }}_form" name="{{ action.action_name }}" class="font-medium inline-flex items-center gap-1 rounded-default justify-center whitespace-nowrap cursor-pointer px-3 py-2 border border-base-200 bg-white text-important dark:border-base-700 dark:bg-transparent hover:bg-base-100/80 dark:hover:bg-base-800/80 w-full lg:w-auto">
                         {{ action.description }}
-                    {% endcomponent %}
+                    </button>
                 {% endfor %}
             {% endblock %}
         </div>

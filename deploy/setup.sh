@@ -26,16 +26,19 @@ python manage.py migrate --noinput
 python manage.py collectstatic --noinput
 
 echo "=== 5. Systemd servislarni sozlash va ulash ==="
-sudo cp deploy/eduqash.service /etc/systemd/system/
-sudo cp deploy/eduqash-celery.service /etc/systemd/system/
-sudo cp deploy/eduqash-bot.service /etc/systemd/system/
+PROJECT_DIR=$(pwd)
+CURRENT_USER=$(whoami)
+
+sed -e "s|/home/ubuntu/eduqash2|$PROJECT_DIR|g" -e "s|User=ubuntu|User=$CURRENT_USER|g" deploy/eduqash.service | sudo tee /etc/systemd/system/eduqash.service > /dev/null
+sed -e "s|/home/ubuntu/eduqash2|$PROJECT_DIR|g" -e "s|User=ubuntu|User=$CURRENT_USER|g" deploy/eduqash-celery.service | sudo tee /etc/systemd/system/eduqash-celery.service > /dev/null
+sed -e "s|/home/ubuntu/eduqash2|$PROJECT_DIR|g" -e "s|User=ubuntu|User=$CURRENT_USER|g" deploy/eduqash-bot.service | sudo tee /etc/systemd/system/eduqash-bot.service > /dev/null
 
 sudo systemctl daemon-reload
 sudo systemctl enable eduqash eduqash-celery eduqash-bot
 sudo systemctl restart eduqash eduqash-celery eduqash-bot
 
 echo "=== 6. Nginx konfiguratsiyasini ulash ==="
-sudo cp deploy/nginx.conf /etc/nginx/sites-available/eduqash
+sed -e "s|/home/ubuntu/eduqash2|$PROJECT_DIR|g" deploy/nginx.conf | sudo tee /etc/nginx/sites-available/eduqash > /dev/null
 sudo ln -sf /etc/nginx/sites-available/eduqash /etc/nginx/sites-enabled/
 sudo rm -f /etc/nginx/sites-enabled/default
 sudo nginx -t

@@ -26,10 +26,13 @@ python manage.py migrate --noinput
 python manage.py collectstatic --noinput
 
 PROJECT_DIR=$(pwd)
-chmod 755 /root 2>/dev/null || true
-chmod 755 "$PROJECT_DIR" 2>/dev/null || true
-chmod -R 755 "$PROJECT_DIR/staticfiles" 2>/dev/null || true
-chmod -R 755 "$PROJECT_DIR/media" 2>/dev/null || true
+sudo mkdir -p /var/www/eduqash/staticfiles
+sudo mkdir -p /var/www/eduqash/media
+sudo cp -r staticfiles/* /var/www/eduqash/staticfiles/ 2>/dev/null || true
+if [ -d "media" ]; then
+    sudo cp -r media/* /var/www/eduqash/media/ 2>/dev/null || true
+fi
+sudo chmod -R 755 /var/www/eduqash
 
 echo "=== 5. Systemd servislarni sozlash va ulash ==="
 PROJECT_DIR=$(pwd)
@@ -45,7 +48,7 @@ sudo systemctl enable eduqash eduqash-celery eduqash-bot
 sudo systemctl restart eduqash eduqash-celery eduqash-bot
 
 echo "=== 6. Nginx konfiguratsiyasini ulash ==="
-sed -e "s|/home/ubuntu/eduqash2|$PROJECT_DIR|g" deploy/nginx.conf | sudo tee /etc/nginx/sites-available/eduqash > /dev/null
+sudo cp deploy/nginx.conf /etc/nginx/sites-available/eduqash
 sudo ln -sf /etc/nginx/sites-available/eduqash /etc/nginx/sites-enabled/
 sudo rm -f /etc/nginx/sites-enabled/default
 sudo nginx -t

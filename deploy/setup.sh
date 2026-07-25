@@ -27,7 +27,8 @@ python manage.py collectstatic --noinput
 
 PROJECT_DIR=$(pwd)
 chmod 755 /root 2>/dev/null || true
-chmod -R 755 "$PROJECT_DIR/staticfiles"
+chmod 755 "$PROJECT_DIR" 2>/dev/null || true
+chmod -R 755 "$PROJECT_DIR/staticfiles" 2>/dev/null || true
 chmod -R 755 "$PROJECT_DIR/media" 2>/dev/null || true
 
 echo "=== 5. Systemd servislarni sozlash va ulash ==="

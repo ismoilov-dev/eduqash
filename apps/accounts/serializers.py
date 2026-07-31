@@ -23,7 +23,7 @@ class RegisterSerializer(serializers.ModelSerializer):
         fields = ('id', 'username', 'email', 'password', 'first_name', 'last_name', 'role', 'phone', 'bio')
 
     def validate_role(self, value):
-        allowed_roles = ('student', 'teacher', 'center_owner')
+        allowed_roles = ('student', 'teacher', 'center_owner', 'admin', 'moderator')
         if value not in allowed_roles:
             raise serializers.ValidationError("Ushbu rol bilan to'g'ridan-to me'yorida ro'yxatdan o'tib bo'lmaydi.")
         return value
